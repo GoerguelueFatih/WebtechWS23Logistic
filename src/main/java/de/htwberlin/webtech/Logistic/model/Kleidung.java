@@ -10,13 +10,13 @@ public class Kleidung {
     @Column(name = "id")
     private Long id;
 
-    @Column (name = "Kleidung")
-    private String Kleidung;
+    @Column (name = "kleidung")
+    private String kleidung;
 
 
     public Kleidung(Long id, String kleidung) {
         this.id = id;
-        Kleidung = kleidung;
+        kleidung = kleidung;
     }
 
     protected Kleidung(){}
@@ -30,10 +30,10 @@ public class Kleidung {
     }
 
     public String getKleidung() {
-        return Kleidung;
+        return kleidung;
     }
 
     public void setKleidung(String kleidung) {
-        Kleidung = kleidung;
+        kleidung = kleidung;
     }
 }

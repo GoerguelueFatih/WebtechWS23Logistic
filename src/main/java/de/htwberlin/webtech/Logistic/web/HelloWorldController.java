@@ -9,6 +9,6 @@ public class HelloWorldController {
 
     @GetMapping(path = "/")
     public ModelAndView showHelloWorld() {
-        return new ModelAndView("helloWorld");
+        return new ModelAndView("HelloWorld");
     }
 }

@@ -1,13 +1,14 @@
 package de.htwberlin.webtech.Logistic.service;
 
-import de.htwberlin.webtech.Logistic.REST.ItemManipulationRequest;
 import de.htwberlin.webtech.Logistic.model.Item;
 import de.htwberlin.webtech.Logistic.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -16,56 +17,36 @@ public class ItemService {
     private final ItemRepository itemRepository;
 
 
-    public List<Item> findAll() {
-        List<Item> items = itemRepository.findAll();
-        return items.stream()
-                .map(this::transformEntity)
-                .collect(Collectors.toList());
-    }
-
-    public Item create(ItemManipulationRequest request) {
-        var item = new Item(
-                request.getAbteilung(),
-                request.getAnzahl(),
-                request.getName());
+    public Item createItem(Item item) {
+        item.setId(UUID.randomUUID().toString());
         itemRepository.save(item);
-        return transformEntity(item);
+        return item;
     }
 
-    public Item transformEntity(Item item) {
-        return new Item(
-                item.getAbteilung(),
-                item.getAnzahl(),
-                item.getName());
+    public List<Item> getAllItems() {
+        return itemRepository.findAll();
     }
 
-    public Item findById(Long id) {
-        var item = itemRepository.findById(id);
-        return item.map(this::transformEntity).orElse(null);
+    public List<Item> searchByName(String name) {
+        return itemRepository.findItemsByNameContaining(name);
     }
 
 
-    public Item update(Long id, ItemManipulationRequest request) {
-        var itemOptional = itemRepository.findById(id);
-        if(itemOptional.isEmpty()){
-            return null;
+    public Optional<Item> updateItem(String itemId, Item updatedItem) {
+        Optional<Item> optionalItem = itemRepository.findById(Long.valueOf(itemId));
+        if (optionalItem.isPresent()) {
+            Item existingItem = optionalItem.get();
+            existingItem.setName(updatedItem.getName());
+            existingItem.setAbteilung(updatedItem.getAbteilung());
+            existingItem.setAnzahl(updatedItem.getAnzahl());
+            itemRepository.save(existingItem);
+            return Optional.of(existingItem);
+        } else {
+            return Optional.empty();
         }
-        var item = itemOptional.get();
-        item.setAbteilung(request.getAbteilung());
-        item.setAnzahl(request.getAnzahl());
-        item.setName(request.getName());
-        itemRepository.save(item);
-
-        return transformEntity(item);
     }
 
-    public boolean deleteById(Long id) {
-        var itemOptional = itemRepository.findById(id);
-        if(itemOptional.isEmpty()){
-            return false;
-        }
-        itemRepository.deleteById(id);
-        return true;
+    public void deleteItem(String itemId) {
+        itemRepository.deleteById(Long.valueOf(itemId));
     }
-
 }

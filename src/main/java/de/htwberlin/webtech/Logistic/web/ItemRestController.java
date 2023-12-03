@@ -1,50 +1,43 @@
 package de.htwberlin.webtech.Logistic.web;
 
 import de.htwberlin.webtech.Logistic.model.Item;
-import de.htwberlin.webtech.Logistic.REST.ItemManipulationRequest;
 import de.htwberlin.webtech.Logistic.service.ItemService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.net.URI;
+import java.util.Optional;
 
 @RestController
+@RequestMapping("/api/item")
 @RequiredArgsConstructor
 public class ItemRestController {
 
     private final ItemService itemService;
 
 
-    @GetMapping(path = "/api/v1/item")
-    public ResponseEntity<List<Item>> getAllItems(){
-        return ResponseEntity.ok(itemService.findAll());
+    @PostMapping
+    public Item createItem(@RequestBody Item item){
+        return itemService.createItem(item);
     }
 
-    @PostMapping(path = "/api/v1/item")
-    public ResponseEntity<Void> createItem(@RequestBody ItemManipulationRequest request){
-        var item = itemService.create(request);
-        URI  uri = URI.create("/api/v1/item/" + item.getId());
-        return ResponseEntity.created(uri).build();
+    @GetMapping
+    public List<Item> getAllItems(@RequestParam(required = false) String name){
+        if(name != null){
+            return itemService.searchByName(name);
+        }
+        return itemService.getAllItems();
     }
 
-    @GetMapping(path = "/api/v1/item/{id}")
-    public ResponseEntity<Item> getItem(@PathVariable Long id){
-        var item = itemService.findById(id);
-        return item != null? ResponseEntity.ok(item) : ResponseEntity.notFound().build();
+    @PutMapping
+    public Optional<Item> updateItem(@RequestParam String id, @RequestBody Item item){
+        return itemService.updateItem(id, item);
     }
 
-    @PutMapping(path = "/api/v1/item/{id}")
-    public ResponseEntity<Void> updateItem(@PathVariable Long id, @RequestBody ItemManipulationRequest request){
-        var item = itemService.update(id, request);
-        return item != null? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+    @DeleteMapping
+    public void deleteItem(String itemId) {
+        itemService.deleteItem(itemId);
     }
 
-    @DeleteMapping(path = "/api/v1/item/{id}")
-    public ResponseEntity<Void> deleteItem(@PathVariable Long id){
-        boolean success = itemService.deleteById(id);
-        return success? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
-    }
+
 }
